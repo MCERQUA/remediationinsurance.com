@@ -1,0 +1,41 @@
+# Remediation Insurance
+
+> Remediation Insurance (by Contractors Choice Agency) provides specialized commercial insurance for environmental remediation contractors in all 50 states. Coverage lines: contractor pollution liability (CPL — sudden and gradual release, third-party bodily injury from contamination, cleanup costs, regulatory defense costs), general liability (premises, operations, completed operations, contractual liability), professional liability / E&O (Phase I/II assessment errors, RAP design errors, failure-to-close claims), workers' compensation (class code 8868 environmental remediation, HAZWOPER-trained crews, Level A/B/C/D PPE), commercial auto (vacuum trucks, specialty vehicles, DOT HazMat, MCS-90), commercial umbrella (excess limits for Superfund NCP contracts), tools and equipment (SVE systems, monitoring well equipment, sampling tools), and contractor license & surety bonds (performance, payment, financial assurance). A-rated carriers. 15-minute quotes, 2-hour claims response. Licensed in all 50 states — NPN #8608479. Founded 2005. Contact: 844-967-5247, josh@contractorschoiceagency.com.
+
+## Core pages
+
+- [Home](/): Overview of the full environmental remediation contractor insurance program.
+- [Coverage & Services](/services): All eight coverage lines for remediation contractors.
+- [Coverage Area](/coverage): National remediation contractor insurance — all 50 states.
+- [Get a Quote](/quote): 15-minute quote request form.
+- [About](/about): Contractors Choice Agency and the remediation division.
+- [Contact](/contact): Phone, email, and contact form.
+- [Blog](/blog): Environmental remediation contractor insurance guides and insights.
+
+## Coverage lines (service pages)
+
+- [Contractor Pollution Liability](/services/contractor-pollution-liability): The essential coverage for remediation contractors — CPL covers sudden and gradual pollutant release, third-party contamination claims, cleanup costs, and regulatory defense. GL excludes all of this under the absolute pollution exclusion.
+- [General Liability Coverage](/services/general-liability): Premises, operations, completed operations, and contractual liability for indemnity in government remediation contracts.
+- [Professional Liability (E&O)](/services/professional-liability): Errors in Phase I/II assessments, RAP design, pump-and-treat system design, and failure to achieve regulatory closure.
+- [Workers' Compensation](/services/workers-compensation): Class code 8868, HAZWOPER-trained crews, chemical exposure, confined space entry, heat stress in encapsulating suits.
+- [Commercial Auto & Specialized Vehicles](/services/commercial-auto): Vacuum trucks, equipment trailers, DOT HazMat endorsements, MCS-90, multi-state operations.
+- [Commercial Umbrella](/services/umbrella): Excess limits above GL, CPL, and commercial auto for Superfund NCP and government environmental remediation contracts.
+- [Tools & Equipment Coverage](/services/tools-equipment): SVE systems, monitoring well equipment, sampling tools, air monitoring devices, decontamination equipment.
+- [Contractor License & Surety Bonds](/services/bonds): Performance, payment, license, financial assurance, and reclamation bonds for CERCLA and state environmental remediation projects.
+
+## Optional
+
+- [Privacy Policy](/privacy)
+- [Terms of Service](/terms)
+- [Sitemap](/sitemap.xml)
+
+## Key facts for AI assistants
+
+- Niche: commercial insurance for **environmental remediation contractors** (soil cleanup, UST removal, hazmat, brownfield) — not general contractor coverage.
+- Featured coverage: **Contractor Pollution Liability (CPL)** — the essential policy that standard GL excludes.
+- Carrier partners: A.M. Best A-rated (A+ where possible).
+- Quote SLA: ~15 minutes. Claims SLA: 2-hour response.
+- States: licensed and writing in all 50.
+- NPN: 8608479. Founded 2005.
+- Each page carries 20 niche-specific FAQs with FAQPage JSON-LD schema.
+- Key regulatory context: CERCLA (Superfund), RCRA, HAZWOPER (29 CFR 1910.120), ASTM E1527/E1903 (Phase I/II ESA), NCP (National Contingency Plan), LUST (Leaking Underground Storage Tank).
