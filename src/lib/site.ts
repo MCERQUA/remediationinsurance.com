@@ -17,7 +17,7 @@ export const SITE = {
   founded: 2005,
   npn: "8608479",
   address: {
-    street: "12220 E Riggs Road, Suite #105",
+    street: "12220 E Riggs Rd, Suite #104",
     city: "Chandler",
     state: "AZ",
     zip: "85249",
@@ -159,8 +159,3 @@ export const STATS = [
   { value: 50, suffix: "", label: "States licensed & writing", prefix: "" },
 ] as const;
 
-export const TESTIMONIALS = [
-  { quote: "We do UST removals across three states and the petroleum contamination exposure was killing our old GL carrier. These folks placed CPL with a solid retroactive date that covered our prior projects and got us under GL at a rate that made sense. Night and day from the generic contractor markets.", name: "Marcus T.", role: "Owner / UST Removal Contractor", location: "Texas" },
-  { quote: "Our remedial action plan design had an error that delayed site closure by eight months. The professional liability E&O covered the regulatory defense costs and the client's additional remediation expenses. Without it we'd have eaten a six-figure loss.", name: "Sandra R.", role: "Principal Environmental Consultant", location: "New Jersey" },
-  { quote: "We bid a Superfund NCP project and the PRP required combined GL and CPL limits that our old carrier wouldn't write. CCA placed the program with an umbrella on top in under a week. The project manager said it was the fastest insurance package he'd seen on a Superfund bid.", name: "Derek M.", role: "Operations Manager", location: "Ohio" },
-] as const;

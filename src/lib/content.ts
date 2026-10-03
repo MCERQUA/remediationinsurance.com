@@ -51,11 +51,6 @@ export const COPY = {
   process: {
     lead: "No two-week back-and-forth. A real conversation, real specialty markets, and a program you can actually understand — built around your remediation scope and regulatory exposure.",
   },
-  testimonials: {
-    eyebrow: "From remediation contractors",
-    h2Lead: "Contractors who found",
-    h2Highlight: "coverage that actually pays",
-  },
   finalCta: {
     h2Lead: "Protect Your Remediation Operation",
     h2Highlight: "with coverage built for environmental contractors.",
