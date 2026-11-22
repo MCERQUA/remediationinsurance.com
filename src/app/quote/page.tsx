@@ -21,7 +21,7 @@ const trustItems = [
 export default function QuotePage() {
   const [formData, setFormData] = useState({
     name: "", businessName: "", email: "", phone: "", state: "", serviceType: "", yearsInBusiness: "", message: "", "bot-field": "",
-    street_address: "", city: "", zip: "", prior_year_gross_sales: "", prior_year_subcontractor_expenses: "", prior_year_employee_count: "", prior_year_employee_payroll: "", estimated_gross_sales: "", estimated_subcontractor_expenses: "", estimated_employee_count: "", estimated_employee_payroll: "", estimated_material_costs: "", subcontractors_have_insurance: "", percent_subcontractors_insured: "", coverage_for_uninsured_subcontractors: "", coverage_types: "", annual_gross_sales: "", year_business_started: "", business_description: "", class_code_1: "", class_code_2: "", class_code_3: "", class_code_4: "", class_code_5: "", residential_vs_commercial: "", new_vs_existing_construction: "", largest_projects: "", prior_carrier_name: "", prior_policy_number: "", prior_policy_expiration: "",
+    street_address: "", city: "", zip: "", prior_year_gross_sales: "", prior_year_subcontractor_expenses: "", prior_year_employee_count: "", prior_year_employee_payroll: "", estimated_gross_sales: "", estimated_subcontractor_expenses: "", estimated_employee_count: "", estimated_employee_payroll: "", estimated_material_costs: "", subcontractors_have_insurance: "", percent_subcontractors_insured: "", coverage_for_uninsured_subcontractors: "", coverage_types: "", annual_gross_sales: "", year_business_started: "", business_description: "", class_code_1: "", class_code_2: "", class_code_3: "", class_code_4: "", class_code_5: "", residential_vs_commercial: "", new_vs_existing_construction: "", largest_projects: "", prior_carrier_name: "", prior_policy_expiration: "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -257,10 +257,6 @@ export default function QuotePage() {
                       <div>
                         <label className={labelClass}>Prior insurance carrier name</label>
                         <input type="text" name="prior_carrier_name" value={formData.prior_carrier_name} onChange={(e) => setFormData({ ...formData, prior_carrier_name: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Prior policy number</label>
-                        <input type="text" name="prior_policy_number" value={formData.prior_policy_number} onChange={(e) => setFormData({ ...formData, prior_policy_number: e.target.value })} className={inputClass} />
                       </div>
                       <div>
                         <label className={labelClass}>Prior policy expiration date</label>
