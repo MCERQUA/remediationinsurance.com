@@ -1,15 +1,63 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import { Navbar } from "@/components/sections/Navbar";
 import { Footer } from "@/components/sections/Footer";
 import { FadeIn } from "@/components/animations/FadeIn";
 import { SITE } from "@/lib/site";
-import { US_STATES, QUOTE_SERVICE_TYPES, YEARS_OPTIONS, COPY } from "@/lib/content";
-import { CheckCircle2, ShieldCheck, ArrowRight, Phone, Clock, Zap, MapPin } from "lucide-react";
+import { YEARS_OPTIONS, COPY } from "@/lib/content";
+import { QuoteForm, type LegacyQuestion } from "@/components/quote/QuoteForm";
+import { ShieldCheck, Phone, Clock, Zap, MapPin } from "lucide-react";
 
 const WEBHOOK_URL = `https://josh.jam-bot.com/social-api/api/leads/webhook/netlify?tenant=josh&site=${SITE.domain}`;
+
+const REMEDIATION_TYPES = [
+  "Mold Remediation",
+  "Asbestos Abatement",
+  "Lead Abatement",
+  "Water / Fire Damage Restoration",
+  "Environmental / Hazardous Material Remediation",
+  "Demolition / Decontamination",
+  "Other",
+];
+
+// Pre-port field names with no canonical twin: still posted under their own names (optional).
+const LEGACY: LegacyQuestion[] = [
+  { name: "yearsInBusiness", label: "Years in business", type: "select", options: YEARS_OPTIONS },
+  { name: "estimated_gross_sales", label: "Estimated gross sales (next 12 months)" },
+  { name: "estimated_subcontractor_expenses", label: "Estimated subcontractor expenses (next 12 months)" },
+  { name: "estimated_employee_count", label: "Estimated employee count (year total)", type: "number" },
+  { name: "estimated_employee_payroll", label: "Estimated employee annual payroll" },
+  { name: "estimated_material_costs", label: "Estimated material costs" },
+  { name: "percent_subcontractors_insured", label: "Percent of subcontractors with insurance", type: "number" },
+  { name: "coverage_for_uninsured_subcontractors", label: "Need coverage for uninsured subcontractors?", type: "select", options: ["Yes", "No"] },
+  { name: "prior_year_employee_count", label: "Prior year employee count", type: "number" },
+  { name: "prior_year_employee_payroll", label: "Prior year employee payroll" },
+  { name: "class_code_1", label: "Class code 1 (+ % of operations)" },
+  { name: "class_code_2", label: "Class code 2 (+ % of operations)" },
+  { name: "class_code_3", label: "Class code 3 (+ % of operations)" },
+  { name: "class_code_4", label: "Class code 4 (+ % of operations)" },
+  { name: "class_code_5", label: "Class code 5 (+ % of operations)" },
+  { name: "residential_vs_commercial", label: "Residential vs commercial split" },
+  { name: "new_vs_existing_construction", label: "New construction vs existing / remodel" },
+  { name: "largest_projects", label: "5 largest projects ever (description + dollar amount)", type: "textarea" },
+];
+
+// Pre-port names that mirror a canonical answer the shared form already asks: derived, never asked twice.
+const deriveLegacy = (d: Record<string, string>): Record<string, string> => ({
+  name: [d.firstName, d.lastName].filter(Boolean).join(" "),
+  serviceType: d.tradeType ?? "",
+  message: d.notes ?? "",
+  street_address: d.address ?? "",
+  business_description: d.businessDescription ?? "",
+  year_business_started: d.yearBusinessStarted ?? "",
+  annual_gross_sales: d.lastGrossSales ?? "",
+  prior_year_gross_sales: d.lastGrossSales ?? "",
+  prior_year_subcontractor_expenses: d.lastSubcontractingCosts ?? "",
+  subcontractors_have_insurance: d.subsCarryInsurance ?? "",
+  coverage_types: d.coverageTypes ?? "",
+  prior_carrier_name: d.currentCarrier ?? "",
+  prior_policy_expiration: d.currentPolicyExpiration ?? "",
+});
 
 const trustItems = [
   { icon: ShieldCheck, title: COPY.quote.trustNicheTitle, desc: COPY.quote.trustNicheDesc },
@@ -19,36 +67,6 @@ const trustItems = [
 ];
 
 export default function QuotePage() {
-  const [formData, setFormData] = useState({
-    name: "", businessName: "", email: "", phone: "", state: "", serviceType: "", yearsInBusiness: "", message: "", "bot-field": "",
-    street_address: "", city: "", zip: "", prior_year_gross_sales: "", prior_year_subcontractor_expenses: "", prior_year_employee_count: "", prior_year_employee_payroll: "", estimated_gross_sales: "", estimated_subcontractor_expenses: "", estimated_employee_count: "", estimated_employee_payroll: "", estimated_material_costs: "", subcontractors_have_insurance: "", percent_subcontractors_insured: "", coverage_for_uninsured_subcontractors: "", coverage_types: "", annual_gross_sales: "", year_business_started: "", business_description: "", class_code_1: "", class_code_2: "", class_code_3: "", class_code_4: "", class_code_5: "", residential_vs_commercial: "", new_vs_existing_construction: "", largest_projects: "", prior_carrier_name: "", prior_policy_expiration: "",
-  });
-  const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (formData["bot-field"]) return;
-    setSubmitting(true);
-    setError("");
-    try {
-      await fetch(WEBHOOK_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ form_name: "quote", source: SITE.domain, ...formData }) });
-      setSubmitted(true);
-    } catch {
-      setError(COPY.quote.errorMessage);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const inputClass = "w-full px-4 py-3 rounded-xl border border-adobe bg-cream/50 text-espresso placeholder-mocha/60 focus:outline-none focus:border-clay focus:ring-2 focus:ring-clay/20 transition-all text-sm";
-  const labelClass = "block text-sm font-heading font-semibold text-espresso mb-1.5";
-
   return (
     <>
       <Navbar />
@@ -87,192 +105,30 @@ export default function QuotePage() {
               </div>
 
               <div className="lg:col-span-2">
-                {submitted ? (
-                  <FadeIn>
-                    <div className="p-10 md:p-12 rounded-3xl bg-white border border-adobe shadow-card text-center">
-                      <div className="w-16 h-16 rounded-full bg-sage/15 flex items-center justify-center mx-auto mb-4"><CheckCircle2 className="h-8 w-8 text-sage" /></div>
-                      <h2 className="font-heading font-extrabold text-espresso text-2xl mb-3">Quote request received</h2>
-                      <p className="text-mocha mb-2">Thank you! We'll review your operation and reach out within one business day with personalized quotes.</p>
-                      <p className="text-sm text-mocha">Need it sooner? Call <a href={SITE.phoneHref} className="text-clay font-heading font-semibold">{SITE.phone}</a>.</p>
-                      <Link href="/" className="btn-secondary mt-6 inline-flex">Back to home</Link>
-                    </div>
-                  </FadeIn>
-                ) : (
-                  <FadeIn>
-                    <form name="quote" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="rounded-3xl bg-white border border-adobe shadow-card p-7 md:p-9 space-y-5">
-                      <input type="hidden" name="form-name" value="quote" />
-                      <input name="bot-field" type="hidden" value={formData["bot-field"]} onChange={handleChange} className="hidden" />
-
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div><label htmlFor="name" className={labelClass}>Full name *</label><input id="name" name="name" type="text" required value={formData.name} onChange={handleChange} placeholder="Jane Smith" className={inputClass} /></div>
-                        <div><label htmlFor="businessName" className={labelClass}>Business name *</label><input id="businessName" name="businessName" type="text" required value={formData.businessName} onChange={handleChange} placeholder={COPY.quote.businessPlaceholder} className={inputClass} /></div>
-                      </div>
-
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div><label htmlFor="email" className={labelClass}>Email *</label><input id="email" name="email" type="email" required value={formData.email} onChange={handleChange} placeholder={COPY.quote.emailPlaceholder} className={inputClass} /></div>
-                        <div><label htmlFor="phone" className={labelClass}>Phone *</label><input id="phone" name="phone" type="tel" required value={formData.phone} onChange={handleChange} placeholder={COPY.quote.phonePlaceholder} className={inputClass} /></div>
-                      </div>
-
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div><label htmlFor="state" className={labelClass}>Primary state *</label>
-                          <select id="state" name="state" required value={formData.state} onChange={handleChange} className={inputClass}><option value="">Select a state…</option>{US_STATES.map((s) => (<option key={s} value={s}>{s}</option>))}</select>
-                        </div>
-                        <div><label htmlFor="yearsInBusiness" className={labelClass}>Years in business</label>
-                          <select id="yearsInBusiness" name="yearsInBusiness" value={formData.yearsInBusiness} onChange={handleChange} className={inputClass}><option value="">Select…</option>{YEARS_OPTIONS.map((y) => (<option key={y} value={y}>{y}</option>))}</select>
-                        </div>
-                      </div>
-
-                      <div><label htmlFor="serviceType" className={labelClass}>What do you need? *</label>
-                        <select id="serviceType" name="serviceType" required value={formData.serviceType} onChange={handleChange} className={inputClass}><option value="">Select coverage…</option>{QUOTE_SERVICE_TYPES.map((s) => (<option key={s} value={s}>{s}</option>))}</select>
-                      </div>
-
-                      <div>
-                        <label htmlFor="message" className={labelClass}>Tell us about your operation <span className="text-mocha/60 font-normal">(optional)</span></label>
-                        <textarea id="message" name="message" rows={4} value={formData.message} onChange={handleChange} placeholder={COPY.quote.messagePlaceholder} className={`${inputClass} resize-none`} />
-                      </div>
-                      {/* complete class field set — forms-required-fields.json */}
-                      <div>
-                        <label className={labelClass}>Street address</label>
-                        <input type="text" name="street_address" value={formData.street_address} onChange={(e) => setFormData({ ...formData, street_address: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>City</label>
-                        <input type="text" name="city" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>ZIP code</label>
-                        <input type="text" name="zip" value={formData.zip} onChange={(e) => setFormData({ ...formData, zip: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Prior year gross sales</label>
-                        <input type="text" name="prior_year_gross_sales" value={formData.prior_year_gross_sales} onChange={(e) => setFormData({ ...formData, prior_year_gross_sales: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Prior year subcontractor expenses</label>
-                        <input type="text" name="prior_year_subcontractor_expenses" value={formData.prior_year_subcontractor_expenses} onChange={(e) => setFormData({ ...formData, prior_year_subcontractor_expenses: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Prior year employee count</label>
-                        <input type="number" name="prior_year_employee_count" value={formData.prior_year_employee_count} onChange={(e) => setFormData({ ...formData, prior_year_employee_count: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Prior year employee payroll</label>
-                        <input type="text" name="prior_year_employee_payroll" value={formData.prior_year_employee_payroll} onChange={(e) => setFormData({ ...formData, prior_year_employee_payroll: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Estimated gross sales (next 12 months)</label>
-                        <input type="text" name="estimated_gross_sales" value={formData.estimated_gross_sales} onChange={(e) => setFormData({ ...formData, estimated_gross_sales: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Estimated subcontractor expenses (next 12 months)</label>
-                        <input type="text" name="estimated_subcontractor_expenses" value={formData.estimated_subcontractor_expenses} onChange={(e) => setFormData({ ...formData, estimated_subcontractor_expenses: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Estimated employee count (year total)</label>
-                        <input type="number" name="estimated_employee_count" value={formData.estimated_employee_count} onChange={(e) => setFormData({ ...formData, estimated_employee_count: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Estimated employee annual payroll</label>
-                        <input type="text" name="estimated_employee_payroll" value={formData.estimated_employee_payroll} onChange={(e) => setFormData({ ...formData, estimated_employee_payroll: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Estimated material costs</label>
-                        <input type="text" name="estimated_material_costs" value={formData.estimated_material_costs} onChange={(e) => setFormData({ ...formData, estimated_material_costs: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Do your subcontractors have insurance?</label>
-                        <select name="subcontractors_have_insurance" value={formData.subcontractors_have_insurance} onChange={(e) => setFormData({ ...formData, subcontractors_have_insurance: e.target.value })} className={inputClass}>
-                          <option value="">Select...</option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className={labelClass}>What percent of your subcontractors have insurance?</label>
-                        <input type="number" name="percent_subcontractors_insured" value={formData.percent_subcontractors_insured} onChange={(e) => setFormData({ ...formData, percent_subcontractors_insured: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Do you need coverage for uninsured subcontractors?</label>
-                        <select name="coverage_for_uninsured_subcontractors" value={formData.coverage_for_uninsured_subcontractors} onChange={(e) => setFormData({ ...formData, coverage_for_uninsured_subcontractors: e.target.value })} className={inputClass}>
-                          <option value="">Select...</option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className={labelClass}>Coverages requested (checkboxes)</label>
-                        <div className="flex flex-wrap pt-1">
-                          <label className="inline-flex items-center gap-2 mr-4 mb-1"><input type="checkbox" name="coverage_types" value="General liability" onChange={(e) => { const cur = (formData.coverage_types || "").split(", ").filter(Boolean); const next = e.target.checked ? [...cur, e.target.value] : cur.filter((v) => v !== e.target.value); setFormData({ ...formData, coverage_types: next.join(", ") }); }} /><span className="text-sm">General liability</span></label>
-                          <label className="inline-flex items-center gap-2 mr-4 mb-1"><input type="checkbox" name="coverage_types" value="Commercial auto" onChange={(e) => { const cur = (formData.coverage_types || "").split(", ").filter(Boolean); const next = e.target.checked ? [...cur, e.target.value] : cur.filter((v) => v !== e.target.value); setFormData({ ...formData, coverage_types: next.join(", ") }); }} /><span className="text-sm">Commercial auto</span></label>
-                          <label className="inline-flex items-center gap-2 mr-4 mb-1"><input type="checkbox" name="coverage_types" value="Workers compensation" onChange={(e) => { const cur = (formData.coverage_types || "").split(", ").filter(Boolean); const next = e.target.checked ? [...cur, e.target.value] : cur.filter((v) => v !== e.target.value); setFormData({ ...formData, coverage_types: next.join(", ") }); }} /><span className="text-sm">Workers compensation</span></label>
-                          <label className="inline-flex items-center gap-2 mr-4 mb-1"><input type="checkbox" name="coverage_types" value="Umbrella / excess" onChange={(e) => { const cur = (formData.coverage_types || "").split(", ").filter(Boolean); const next = e.target.checked ? [...cur, e.target.value] : cur.filter((v) => v !== e.target.value); setFormData({ ...formData, coverage_types: next.join(", ") }); }} /><span className="text-sm">Umbrella / excess</span></label>
-                          <label className="inline-flex items-center gap-2 mr-4 mb-1"><input type="checkbox" name="coverage_types" value="Pollution liability" onChange={(e) => { const cur = (formData.coverage_types || "").split(", ").filter(Boolean); const next = e.target.checked ? [...cur, e.target.value] : cur.filter((v) => v !== e.target.value); setFormData({ ...formData, coverage_types: next.join(", ") }); }} /><span className="text-sm">Pollution liability</span></label>
-                          <label className="inline-flex items-center gap-2 mr-4 mb-1"><input type="checkbox" name="coverage_types" value="Professional liability" onChange={(e) => { const cur = (formData.coverage_types || "").split(", ").filter(Boolean); const next = e.target.checked ? [...cur, e.target.value] : cur.filter((v) => v !== e.target.value); setFormData({ ...formData, coverage_types: next.join(", ") }); }} /><span className="text-sm">Professional liability</span></label>
-                        </div>
-                      </div>
-                      <div>
-                        <label className={labelClass}>Annual gross sales</label>
-                        <input type="text" name="annual_gross_sales" value={formData.annual_gross_sales} onChange={(e) => setFormData({ ...formData, annual_gross_sales: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Year business started</label>
-                        <input type="number" name="year_business_started" value={formData.year_business_started} onChange={(e) => setFormData({ ...formData, year_business_started: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Description of business</label>
-                        <textarea name="business_description" rows={3} value={formData.business_description} onChange={(e) => setFormData({ ...formData, business_description: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Class code 1 (+ % of operations)</label>
-                        <input type="text" name="class_code_1" value={formData.class_code_1} onChange={(e) => setFormData({ ...formData, class_code_1: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Class code 2 (+ % of operations)</label>
-                        <input type="text" name="class_code_2" value={formData.class_code_2} onChange={(e) => setFormData({ ...formData, class_code_2: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Class code 3 (+ % of operations)</label>
-                        <input type="text" name="class_code_3" value={formData.class_code_3} onChange={(e) => setFormData({ ...formData, class_code_3: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Class code 4 (+ % of operations)</label>
-                        <input type="text" name="class_code_4" value={formData.class_code_4} onChange={(e) => setFormData({ ...formData, class_code_4: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Class code 5 (+ % of operations)</label>
-                        <input type="text" name="class_code_5" value={formData.class_code_5} onChange={(e) => setFormData({ ...formData, class_code_5: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Residential vs commercial split</label>
-                        <input type="text" name="residential_vs_commercial" value={formData.residential_vs_commercial} onChange={(e) => setFormData({ ...formData, residential_vs_commercial: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>New construction vs existing / remodel</label>
-                        <input type="text" name="new_vs_existing_construction" value={formData.new_vs_existing_construction} onChange={(e) => setFormData({ ...formData, new_vs_existing_construction: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>5 largest projects ever (description + dollar amount)</label>
-                        <textarea name="largest_projects" rows={3} value={formData.largest_projects} onChange={(e) => setFormData({ ...formData, largest_projects: e.target.value })} placeholder="Description and dollar amount for each" className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Prior insurance carrier name</label>
-                        <input type="text" name="prior_carrier_name" value={formData.prior_carrier_name} onChange={(e) => setFormData({ ...formData, prior_carrier_name: e.target.value })} className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Prior policy expiration date</label>
-                        <input type="date" name="prior_policy_expiration" value={formData.prior_policy_expiration} onChange={(e) => setFormData({ ...formData, prior_policy_expiration: e.target.value })} className={inputClass} />
-                      </div>
-
-
-                      {error && <p className="text-red-600 text-sm font-medium">{error}</p>}
-
-                      <p className="text-xs text-center text-mocha/70">No spam. No commitment. We'll only contact you about your quote.</p>
-                      <button type="submit" disabled={submitting} className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-clay-gradient text-white font-heading font-bold rounded-full shadow-warm hover:shadow-warm-lg hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
-                        {submitting ? "Sending…" : "Request my free quote"}{!submitting && <ArrowRight className="h-5 w-5" />}
-                      </button>
-</form>
-                  </FadeIn>
-                )}
+                <FadeIn>
+                  <div className="rounded-3xl bg-white border border-adobe shadow-card p-7 md:p-9">
+                    <QuoteForm
+                      formName="quote"
+                      tradeName="Remediation"
+                      endpoint={WEBHOOK_URL}
+                      format="json"
+                      netlifyFallback="/__forms.html"
+                      extraFields={{ form_name: "quote", source: SITE.domain }}
+                      options={{ yn: true, feinRequired: false }}
+                      tradeTypeOptions={REMEDIATION_TYPES}
+                      defaults={{ coverageTypes: "General Liability" }}
+                      legacyQuestions={LEGACY}
+                      deriveLegacy={deriveLegacy}
+                      classes={{
+                        input: "w-full px-4 py-3 rounded-xl border border-adobe bg-cream/50 text-espresso focus:outline-none focus:border-clay focus:ring-2 focus:ring-clay/20 transition-all text-sm",
+                        label: "block text-sm font-heading font-semibold text-espresso mb-1.5",
+                        legend: "block text-sm font-heading font-semibold text-espresso mb-1.5",
+                        heading: "font-heading font-bold text-espresso text-lg border-b border-adobe pb-2",
+                        button: "w-full px-8 py-4 bg-clay-gradient text-white font-heading font-bold rounded-full shadow-warm hover:shadow-warm-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed",
+                      }}
+                    />
+                  </div>
+                </FadeIn>
               </div>
             </div>
           </div>
